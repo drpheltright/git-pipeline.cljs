@@ -4,14 +4,6 @@
             [cljsjs.oauthio]
             [git-pipeline.routes :as routes]))
 
-; OAuth.popup('facebook')
-;     .done(function(result) {})
-;       //use result.access_token in your API request
-;       //or use result.get|post|put|del|patch|me methods (see below)
-;
-;     .fail(function (err) {})
-;       //handle error with err
-; ;
 (js/OAuth.initialize  "MrqjIqW8jg_SNqpOvvdWvZ4P_w8")
 
 (defn- handle-sign-in [store result]

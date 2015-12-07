@@ -1,0 +1,2 @@
+{:require [git-pipeline.core]
+ :init-fns [git-pipeline.core/init]}

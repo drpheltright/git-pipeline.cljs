@@ -32,9 +32,9 @@
 
   ;; Just for logging application state changes
   ;;
-  ;; (add-watch store :path-logger
-  ;;   (fn [key store state next-state]
-  ;;     (println next-state)))
+  (add-watch store :path-logger
+    (fn [key store state next-state]
+      (println next-state)))
 
   ;; Rebuilds app everytime state changes provided it can find a page
   ;; component to render.
@@ -60,7 +60,9 @@
   ;;
   (add-watch store :authentication
     (fn [key store state next-state]
-      (if (and (empty? (:token next-state))) (not= (:token state) (:token next-state))
+      (if (and
+            (empty? (:token next-state))
+            (not= (:path next-state) :sign-in))
         (.setToken (:history @store) (routes/component->path :sign-in)))))
 
   ;; History will update application state :path everytime URL changes

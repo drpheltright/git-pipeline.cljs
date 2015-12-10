@@ -24,7 +24,8 @@
   ;; Default application state
   ;;
   (def store (atom {:pages {:sign-in session/SignIn
-                            :repos github/Repos}
+                            :repos github/Repos
+                            :repo github/Repo}
                     :page nil
                     :path nil
                     :token nil}))
@@ -32,9 +33,9 @@
 
   ;; Just for logging application state changes
   ;;
-  (add-watch store :path-logger
-    (fn [key store state next-state]
-      (println next-state)))
+  ;; (add-watch store :path-logger
+  ;;   (fn [key store state next-state]
+  ;;     (println next-state)))
 
   ;; Rebuilds app everytime state changes provided it can find a page
   ;; component to render.
@@ -53,8 +54,9 @@
   (add-watch store :path-dispatcher
     (fn [key store state next-state]
       (if (not= (:path state) (:path next-state))
-        (if-let [page-component (get (:pages next-state) (routes/path->component (:path next-state)))]
-          (swap! store assoc :page page-component)))))
+        (when-let [page-component (get (:pages next-state) (routes/path->component (:path next-state)))]
+          (swap! store assoc :page page-component
+                             :params (routes/path->params (:path next-state)))))))
 
   ;; Check user authenticated else redirect them
   ;;
@@ -63,7 +65,7 @@
       (if (and
             (empty? (:token next-state))
             (not= (:path next-state) :sign-in))
-        (.setToken (:history @store) (routes/component->path :sign-in)))))
+        (.setToken (:history @store) (routes/component->path :sign-in {} true)))))
 
   ;; History will update application state :path everytime URL changes
   ;;

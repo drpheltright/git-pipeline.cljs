@@ -3,10 +3,16 @@
 
 (def routes
   ["/" {"" :sign-in
-        "/repos" :repos}])
+        "repos/" {"" :repos
+                  [:user "/" :name] :repo}}])
 
 (defn path->component [path]
   (:handler (bidi/match-route routes path)))
 
-(defn component->path [component]
-  (str "/#" (bidi/path-for routes component)))
+(defn path->params [path]
+  (:route-params (bidi/match-route routes path)))
+
+(defn component->path
+  ([component] (str "/#" (bidi/path-for routes component)))
+  ([component params] (str "/#" (apply (partial bidi/path-for routes component) (flatten (into [] params)))))
+  ([component params without-prefix] (apply (partial bidi/path-for routes component) params)))

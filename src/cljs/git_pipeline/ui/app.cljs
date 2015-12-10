@@ -4,8 +4,7 @@
             [git-pipeline.routes :as routes]))
 
 (defn- logout [store e]
-  (swap! store assoc :token nil)
-  (set! (.-location js/window) (routes/component->path :sign-in)))
+  (swap! store assoc :token nil))
 
 (q/defcomponent App
   :name "App"

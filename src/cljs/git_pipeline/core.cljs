@@ -56,9 +56,17 @@
         (if-let [page-component (get (:pages next-state) (routes/path->component (:path next-state)))]
           (swap! store assoc :page page-component)))))
 
+  ;; Check user authenticated else redirect them
+  ;;
+  (add-watch store :authentication
+    (fn [key store state next-state]
+      (if (and (empty? (:token next-state))) (not= (:token state) (:token next-state))
+        (.setToken (:history @store) (routes/component->path :sign-in)))))
+
   ;; History will update application state :path everytime URL changes
   ;;
   (let [history (History.)]
+    (swap! store assoc :history history)
     (events/listen history EventType.NAVIGATE
       (fn [e]
         (let [token (.-token e)]

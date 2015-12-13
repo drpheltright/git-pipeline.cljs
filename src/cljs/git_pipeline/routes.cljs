@@ -14,5 +14,6 @@
 
 (defn component->path
   ([component] (str "/#" (bidi/path-for routes component)))
-  ([component params] (str "/#" (apply (partial bidi/path-for routes component) (flatten (into [] params)))))
-  ([component params without-prefix] (apply (partial bidi/path-for routes component) params)))
+  ([component params] (str "/#" (component->path component params true)))
+  ([component params without-prefix] (apply (partial bidi/path-for routes component)
+                                       (flatten (into [] params)))))

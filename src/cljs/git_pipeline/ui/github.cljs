@@ -1,18 +1,8 @@
 (ns git-pipeline.ui.github
   (:require [quiescent.core :as q]
             [quiescent.dom :as dom]
-            [git_pipeline.routes :as routes]))
-
-(defn- load-repos [_ data store]
-  (-> (js/Github. #js{:token (:token data) :auth "oauth"})
-      (.getUser)
-      (.repos {} #(swap! store assoc :repos %2))))
-
-(defn- load-repo [_ data store]
-  (-> (js/Github. #js{:token (:token data) :auth "oauth"})
-      (.getRepo (-> data :params :user)
-                (-> data :params :name))
-      (.listBranches #(swap! store assoc :branches %2))))
+            [git-pipeline.routes :as routes]
+            [git-pipeline.data.github :as data]))
 
 (defn- repo-link [repo]
   (let [repo-url (.-html_url repo)
@@ -22,17 +12,27 @@
     (dom/li {}
       (dom/a {:href href} repo-url))))
 
+(defn- handle-repos-mount [e data store]
+  (data/load-repos store))
+
+(defn- handle-repo-mount [e data store]
+  (let [[user repo-name] (vals (select-keys (:params data) [:user :name]))]
+    (data/load-repo store user repo-name)))
+
 (q/defcomponent Repos
   :name "Repos"
-  :on-mount load-repos
+  :on-mount handle-repos-mount
   [data store]
-  (dom/ul {} (map repo-link (:repos data))))
+  (dom/div {}
+    (dom/h1 {} "Repositories")
+    (dom/ul {} (map repo-link (:repos data)))))
 
 (q/defcomponent Repo
   :name "Repo"
-  :on-mount load-repo
+  :on-mount handle-repo-mount
   [data store]
   (println (:params data))
   (dom/div {}
     (dom/h1 {} (vals (:params data)))
-    (dom/ul {} (map #(dom/li {} %) (:branches data)))))
+    (dom/ul {} (map #(dom/li {} %) (:branches data)))
+    (dom/a {:href (routes/component->path :repos)} "Back to repositories")))

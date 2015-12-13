@@ -1,23 +1,19 @@
 (ns git-pipeline.ui.session
   (:require [quiescent.core :as q]
             [quiescent.dom :as dom]
-            [cljsjs.oauthio]
-            [git-pipeline.routes :as routes]))
+            [git-pipeline.routes :as routes]
+            [git-pipeline.data.sessions :as data]))
 
-(js/OAuth.initialize  "MrqjIqW8jg_SNqpOvvdWvZ4P_w8")
-
-(defn- handle-sign-in [store result]
-  (swap! store assoc :token (.-access_token result))
+(defn- handle-sign-in []
   (set! (.-location js/window) (routes/component->path :repos)))
 
-(defn- handle-error [error] (println error))
+(defn- handle-error [error]
+  (println error))
 
 (defn- handle-form-submit [e store]
   (.preventDefault e)
   (println "logging in")
-  (-> (js/OAuth.popup "github")
-      (.done (partial handle-sign-in store))
-      (.fail handle-error)))
+  (data/github-oauth-login store handle-sign-in handle-error))
 
 (q/defcomponent SignIn
   :name "SignIn"
